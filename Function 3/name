@@ -1,1 +1,25 @@
-
+#include<stdio.h>
+#include<string.h>
+#include<string>
+//Major[] = array of majors
+funcTM()
+{
+	int i,n=0,Total;
+	std::string input;
+	printf("Please Input Major:");
+	scanf("%s",&input);
+	printf("Major \t Name \t Student ID \t Subject 1 (Weight) \t Grade \t Subject 2 (Weight) \t Grade \t Total Marks\n" );
+	for(i=0;i<=3;i++)
+	{
+		if(input==Major[i])
+		{
+			Total = (Sub1W[i]*Sub1Grd[i]+Sub2W[i]*Sub2Grd[i])/(Sub1W[i]+Sub2W[i]);
+			printf("%s \t %s \t %d \t %s(%d) \t %f \t %s(%d) \t %f \t %f\n",Major[i],Name[i],ID[i],Sub1[i],Sub1W[i],Sub1Grd[i],Sub2[i],Sub2W[i],Sub2Grd[i],Total);
+		}
+		n++
+	}
+	if(n==0)
+	printf("No Majors match your search, please try again!");
+	
+return 0;	
+}
