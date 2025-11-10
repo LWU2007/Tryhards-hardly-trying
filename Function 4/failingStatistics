@@ -9,7 +9,7 @@ typedef struct{
 
 void failingStatistics(Student student[], int count);
 
-int main(){
+int main(){ 
 
 Student student[] = {
     {1001, "Fandy", {85.5, 45.0, 78.0, 92.0, 56.5, 20.0}},
@@ -30,13 +30,13 @@ void failingStatistics(Student student[], int studentCount){
     for(int i = 0; i < studentCount ; i++){
 
         int failCount = 0;
-        int failedSubjects[5] = {0};
-        float failedGrades[5] = {0};
+        int failedSubjectNum[5] = {0};
+        float failedSubjectGrade[5] = {0};
 
         for(int j=0; j < subjectCount ; j++){
             if(student[i].grades[j] <60.0){
-                failedSubjects[failCount] = j + 1;
-                failedGrades[failCount] = student[i].grades[j];
+                failedSubjectNum[failCount] = j + 1;
+                failedSubjectGrade[failCount] = student[i].grades[j];
                 failCount++;}
         }
 
@@ -44,7 +44,7 @@ void failingStatistics(Student student[], int studentCount){
             anyStudentFailed = true;
             printf("\n%s (ID: %d) failed %d subjects\n", student[i].name, student[i].id, failCount);
             for(int k = 0; k < failCount; k++){
-                printf("Subject %d: %.1f\n", failedSubjects[k], failedGrades[k]);
+                printf("Subject %d: %.1f\n", failedSubjectNum[k], failedSubjectGrade[k]);
             }
         }
         
