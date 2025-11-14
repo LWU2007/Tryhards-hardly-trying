@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<string.h>
 #include<string>
-//Major[] = array of majors
 funcTM()
 {
 	int i,n,Total;
