@@ -1,1 +1,91 @@
+#include <stdio.h>
+#include <string.h>
 
+struct Student {
+    char name[50];
+    float grade;
+};
+
+void sortByGrade(struct Student s[], int n, int ascending) {
+    int i, j;
+    struct Student temp;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            int condition = ascending ? (s[j].grade > s[j + 1].grade)
+                                      : (s[j].grade < s[j + 1].grade);
+
+            if (condition) {
+                temp = s[j];
+                s[j] = s[j + 1];
+                s[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// 🧾 Print list of students
+void printList(struct Student s[], int n) {
+    printf("\n%-15s %s\n", "Name", "Grade");
+    printf("----------------------\n");
+    for (int i = 0; i < n; i++) {
+        printf("%-15s %.2f\n", s[i].name, s[i].grade);
+    }
+}
+
+int main() {
+    // 📘 Preloaded database
+    struct Student students[] = {
+        {"Nathan", 3.91},
+        {"Roderick", 3.68},
+        {"Fandy", 3.77},
+        {"Lance", 3.99},
+        {"Shau Hon", 3.54}
+    };
+    int n = 5;
+
+    char cmd1[10], cmd2[10]; // e.g., "sort" "asc"
+
+    printf("Initial list (unsorted):\n");
+    printList(students, n);
+
+    printf("\nCommands available:\n");
+    printf("  sort asc   - sort by grade (lowest → highest)\n");
+    printf("  sort desc  - sort by grade (highest → lowest)\n");
+    printf("  exit       - quit the program\n");
+
+    while (1) {
+        printf("\n> ");
+
+        // Read two words (command + option). cmd2 may be empty.
+        int count = scanf("%s", cmd1);
+        if (count == EOF) break;
+
+        if (strcmp(cmd1, "sort") == 0) {
+            scanf("%s", cmd2);  // read sorting order
+
+            if (strcmp(cmd2, "asc") == 0) {
+                sortByGrade(students, n, 1);
+                printf("\nSorted list (ascending):\n");
+                printList(students, n);
+            }
+            else if (strcmp(cmd2, "desc") == 0) {
+                sortByGrade(students, n, 0);
+                printf("\nSorted list (descending):\n");
+                printList(students, n);
+            }
+            else {
+                printf("Invalid sort order. Use 'asc' or 'desc'.\n");
+            }
+        }
+        else if (strcmp(cmd1, "exit") == 0) {
+            printf("Exiting program.\n");
+            break;
+        }
+        else {
+            printf("Unknown command. Try 'sort asc', 'sort desc', or 'exit'.\n");
+        }
+    }
+
+    return 0;
+}
