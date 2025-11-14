@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <string.h>
+
+struct Result {
+    char name[50];
+    char id[10];
+    char subject[50];
+    int score;
+};
+
+int main() {
+    struct Result results[] = {
+        {"John", "1001", "Math", 90},
+        {"Mary", "1002", "Science", 85},
+        {"John", "1001", "English", 88}
+    };
+
+    char name[50], id[10], subject[50];
+    int found = 0;
+
+    printf("=====================================\n");
+    printf("     STUDENT ACHIEVEMENT PROGRAM     \n");
+    printf("          RESULT QUERY PAGE          \n");
+    printf("=====================================\n\n");
+
+    printf("Enter Name    (or press ENTER to skip): ");
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = 0; // remove newline
+
+    printf("Enter Student ID (or press ENTER to skip): ");
+    fgets(id, sizeof(id), stdin);
+    id[strcspn(id, "\n")] = 0;
+
+    printf("Enter Subject  (or press ENTER to skip): ");
+    fgets(subject, sizeof(subject), stdin);
+    subject[strcspn(subject, "\n")] = 0;
+
+    printf("\n------------ SEARCH RESULTS -----------\n");
+
+    for (int i = 0; i < 3; i++) {
+        if ((strlen(name) == 0 || strcmp(results[i].name, name) == 0) &&
+            (strlen(id) == 0 || strcmp(results[i].id, id) == 0) &&
+            (strlen(subject) == 0 || strcmp(results[i].subject, subject) == 0)) {
+
+            printf("%s | %s | %s | Score: %d\n",
+                   results[i].name, results[i].id,
+                   results[i].subject, results[i].score);
+
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("No matching records found.\n");
+    }
+
+    printf("---------------------------------------\n");
+
+    return 0;
+}
