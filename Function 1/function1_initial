@@ -1,0 +1,155 @@
+#include<stdio.h>
+#include<ctype.h>
+#include <string.h>
+
+typedef struct{
+    char name[50]; //variables cannot be declared immediately
+    int ID;
+    char major[50];//Engineering, Business, and Arts
+    
+    char sub1[50];
+    int sub1w;
+    float sub1grd;
+
+    char sub2[50];
+    int sub2w;
+    float sub2grd;
+
+}input;
+
+void print_info(input student_info){//parameters, the name doesnt have to be the same, but the data type needs to be
+    printf("-----------------------------\n");
+    printf("Name: %s\n",student_info.name);
+    printf("ID: %d\n",student_info.ID);
+    printf("Major: %s\n",student_info.major);
+    
+    printf("%s: %.2f\n",student_info.sub1, student_info.sub1grd);
+    //printf("%d\n",student_info.sub1w);
+
+    printf("%s: %.2f\n",student_info.sub2, student_info.sub2grd);
+    //printf("%d\n",student_info.sub2w);
+    
+}
+
+int main(){ //int input_info(){ 
+    int a, i, j, k;
+    printf("Number of Students' Information to be Inputted: ");
+    scanf("%d",&a);
+
+    input student[a]={};
+
+    for(i=0;i<a;i++){
+        int valid = 0;//checks to see if major inputted is valid or not;
+
+        printf("\nName: ");
+        scanf("%s",&student[i].name);//turns out you can do this
+
+        printf("ID: ");
+        scanf("%d",&student[i].ID);
+    
+        printf("Major: ");
+        scanf("%s",&student[i].major);
+        
+        for(int j = 0; student[i].major[j]; j++) {
+            student[i].major[j] = tolower(student[i].major[j]);
+        }
+
+        while(valid == 0){
+        if( strcmp(student[i].major, "engineering")==0){//dont use ==; use strcmp for strings
+            strcpy(student[i].sub1, "Calculus"); //cannot assign directly like a variable, need to use strcpy
+            strcpy(student[i].sub2,"Physics");
+            
+            printf("\nInput Scores\n");
+
+            printf("Calculus: ");
+            scanf("%f",&student[i].sub1grd);
+            printf("Physics: ");
+            scanf("%f",&student[i].sub2grd);
+
+            valid++;
+        }
+        else if(strcmp(student[i].major, "business")==0){//dont use ==; use strcmp for strings
+            strcpy(student[i].sub1, "Accounting"); //cannot assign directly like a variable, need to use strcpy
+            strcpy(student[i].sub2,"Marketing");
+            
+            printf("\nInput Scores\n");
+
+            printf("Accounting: ");
+            scanf("%f",&student[i].sub1grd);
+            printf("Marketing: ");
+            scanf("%f",&student[i].sub2grd);
+            
+            valid++;
+        }
+        else if(strcmp(student[i].major, "arts")==0){//dont use ==; use strcmp for strings
+            strcpy(student[i].sub1, "Philosophy"); //cannot assign directly like a variable, need to use strcpy
+            strcpy(student[i].sub2,"History");
+            printf("\nInput Scores\n");
+            
+            printf("Philosophy: ");
+            scanf("%f",&student[i].sub1grd);
+            printf("History: ");
+            scanf("%f",&student[i].sub2grd);
+
+            valid++;
+        }
+        else{
+            printf("This is not an appropriate major. Please enter engineering, business, or arts: ");
+                scanf("%49s", student[i].major);
+                
+                // Convert new input to lowercase
+                for(int j = 0; student[i].major[j]; j++)
+                    student[i].major[j] = tolower(student[i].major[j]);
+            }    
+        }
+    }
+    printf("\nStudent Information\n");        
+    for(k=0;k<a;k++){
+        print_info(student[k]);
+    }
+    printf("-----------------------------\n");
+
+    return 0;
+}
+/*int main() {
+    int operator;
+
+    printf("\t\t\t\t********************************************************\n");
+    printf("\t\t\t\t*    Welcome to the Student Grade Management System    *\n");
+    printf("\t\t\t\t*    Please enter your options:                        *\n");
+    printf("\t\t\t\t*    1. Input Basic Study Student Information          *\n");
+    printf("\t\t\t\t*    2. Result Query                                   *\n");
+    printf("\t\t\t\t*    3. Result Statistics                              *\n");
+    printf("\t\t\t\t*    4. Failing Statistics                             *\n");
+    printf("\t\t\t\t*    5. Browsing of Results                            *\n");
+    printf("\t\t\t\t*    . Exit                                           *\n");
+    printf("\t\t\t\t********************************************************\n");
+    printf("\t\t\t\tPlease input a number (1-5): \n\n");
+
+    scanf("%d",&operator);
+    switch(operator){
+        case 1:
+            printf("This is a test1");
+            break;
+        case 2:
+            printf("This is a test2");
+            break;
+        case 3:
+            printf("This is a test 3");
+            break;
+        case 4:
+            printf("This is a test4");
+            break;
+        case 5:
+            printf("This is a test5");
+            break;
+        case 6:
+            printf("This is a test66");
+            break;
+
+    }
+
+    return 0;
+}*/
+
+/*1. Info input (name, student id, grade, major(listed) , n[subject + weight] */
