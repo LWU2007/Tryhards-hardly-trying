@@ -24,7 +24,7 @@ void sortByGrade(struct Student s[], int n, int ascending) {
     }
 }
 
-// 🧾 Print list of students
+// Print list of students
 void printList(struct Student s[], int n) {
     printf("\n%-15s %s\n", "Name", "Grade");
     printf("----------------------\n");
@@ -34,7 +34,7 @@ void printList(struct Student s[], int n) {
 }
 
 int main() {
-    // 📘 Preloaded database
+    // Preloaded database
     struct Student students[] = {
         {"Nathan", 3.91},
         {"Roderick", 3.68},
