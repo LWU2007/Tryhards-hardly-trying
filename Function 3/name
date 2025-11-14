@@ -4,19 +4,19 @@
 //Major[] = array of majors
 funcTM()
 {
-	int i,n=0,Total;
+	int i,n,Total;
 	std::string input;
 	printf("Please Input Major:");
 	scanf("%s",&input);
 	printf("Major \t Name \t Student ID \t Subject 1 (Weight) \t Grade \t Subject 2 (Weight) \t Grade \t Total Marks\n" );
 	for(i=0;i<=3;i++)
-	{
-		if(input==Major[i])
+	{n=0;
+		if(strcmp(input==student[i].major))
 		{
-			Total = (Sub1W[i]*Sub1Grd[i]+Sub2W[i]*Sub2Grd[i])/(Sub1W[i]+Sub2W[i]);
-			printf("%s \t %s \t %d \t %s(%d) \t %f \t %s(%d) \t %f \t %f\n",Major[i],Name[i],ID[i],Sub1[i],Sub1W[i],Sub1Grd[i],Sub2[i],Sub2W[i],Sub2Grd[i],Total);
+			Total = (student[i].sub1w*student[i].sub1grd+student[i].sub2w*student[i].sub2grd)/(student[i].sub1w+student[i].sub2w);
+			printf("%s \t %s \t %d \t %s(%d) \t %f \t %s(%d) \t %f \t %f\n",student[i].major,student[i].name,student[i].ID,student[i].sub1,student[i].sub1W,student[i].sub1Grd,student[i].sub2,student[i].sub2W,student[i].sub2Grd,Total);
 		}
-		n++
+		n++;
 	}
 	if(n==0)
 	printf("No Majors match your search, please try again!");
