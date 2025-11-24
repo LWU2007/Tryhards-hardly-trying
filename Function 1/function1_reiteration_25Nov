@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+typedef struct {
+    char name[50];
+    int ID;
+    int major; 
+
+    char sub1[50];
+    float sub1grd;
+
+    char sub2[50];
+    float sub2grd;
+
+} input;
+
+void print_info(input s) {
+    /* Convert major number to text */
+    char majorText[20];
+    switch (s.major) {
+        case 1: strcpy(majorText, "Engineering"); break;
+        case 2: strcpy(majorText, "Business");    break;
+        case 3: strcpy(majorText, "Arts");        break;
+        default: strcpy(majorText, "Unknown");   break;
+    }
+
+    /* Each column inner width = 31 characters */
+    printf("\n+---------------------------------+---------------------------------+\n");
+    /* "Name: " is 6 chars -> 31 - 6 = 25 for name content */
+    /* "Major: " is 7 chars -> 31 - 7 = 24 for major content */
+    printf("| Name: %-25.25s | Major: %-24.24s |\n", s.name, majorText);
+    printf("+---------------------------------+---------------------------------+\n");
+    /* Subject names fill full 31 chars each */
+    printf("| %-31.31s | %-31.31s |\n", s.sub1, s.sub2);
+    /* "Score: " is 7 chars -> 31 - 7 = 24 for numeric formatting */
+    printf("| Score: %-24.2f | Score: %-24.2f |\n", s.sub1grd, s.sub2grd);
+    printf("+---------------------------------+---------------------------------+\n");
+}
+
+void remove_newline(char *str) {
+    str[strcspn(str, "\n")] = '\0';
+}
+
+int main() { //int input_info(){
+    int count;
+
+    printf("Number of Students' Information to be Inputted: ");
+    scanf("%d", &count);
+    getchar();
+
+    input student[count];
+
+    for (int i = 0; i < count; i++) {
+
+        printf("\nName: ");
+        fgets(student[i].name, sizeof(student[i].name), stdin);
+        remove_newline(student[i].name);
+
+        printf("ID: ");
+        scanf("%d", &student[i].ID);
+        getchar();
+
+        // Major selection
+        int choice = 0;
+
+        while (choice < 1 || choice > 3) {
+            printf("Select Major (1=Engineering, 2=Business, 3=Arts): ");
+            scanf("%d", &choice);
+            getchar();
+        }
+
+        student[i].major = choice;
+
+        // Assign subjects based on major
+        switch (choice) {
+            case 1: // Engineering
+                strcpy(student[i].sub1, "Calculus");
+                strcpy(student[i].sub2, "Physics");
+                break;
+            case 2: // Business
+                strcpy(student[i].sub1, "Accounting");
+                strcpy(student[i].sub2, "Marketing");
+                break;
+            case 3: // Arts
+                strcpy(student[i].sub1, "Philosophy");
+                strcpy(student[i].sub2, "History");
+                break;
+        }
+
+        // Input grades
+        printf("\nInput Scores\n");
+
+        printf("%s: ", student[i].sub1);
+        scanf("%f", &student[i].sub1grd);
+        printf("%s: ", student[i].sub2);
+        scanf("%f", &student[i].sub2grd);
+        getchar();
+    }
+
+    // Print all info
+    printf("\nStudent Information");
+    for (int k = 0; k < count; k++) {
+        print_info(student[k]);
+    }
+    printf("-----------------------------\n");
+
+    return 0;
+}
+
+/*int main() {
+    int operator;
+
+    printf("\t\t\t\t********************************************************\n");
+    printf("\t\t\t\t*    Welcome to the Student Grade Management System    *\n");
+    printf("\t\t\t\t*    Please enter your options:                        *\n");
+    printf("\t\t\t\t*    1. Input Basic Study Student Information          *\n");
+    printf("\t\t\t\t*    2. Result Query                                   *\n");
+    printf("\t\t\t\t*    3. Result Statistics                              *\n");
+    printf("\t\t\t\t*    4. Failing Statistics                             *\n");
+    printf("\t\t\t\t*    5. Browsing of Results                            *\n");
+    printf("\t\t\t\t*    0. Exit                                           *\n");
+    printf("\t\t\t\t********************************************************\n");
+    printf("\t\t\t\tPlease input a number (1-5): \n\n");
+
+    scanf("%d",&operator);
+    switch(operator){
+        case 1:
+            printf("This is a test1");
+            break;
+        case 2:
+            printf("This is a test2");
+            break;
+        case 3:
+            printf("This is a test 3");
+            break;
+        case 4:
+            printf("This is a test4");
+            break;
+        case 5:
+            printf("This is a test5");
+            break;
+        case 6:
+            printf("This is a test66");
+            break;
+
+    }
+
+    return 0;
+}*/
