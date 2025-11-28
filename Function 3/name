@@ -1,24 +1,70 @@
-#include<stdio.h>
-#include<string.h>
-#include<string>
-funcTM()
-{
-	int i,n,Total;
-	std::string input;
-	printf("Please Input Major:");
-	scanf("%s",&input);
-	printf("Major \t Name \t Student ID \t Subject 1 (Weight) \t Grade \t Subject 2 (Weight) \t Grade \t Total Marks\n" );
-	for(i=0;i<=3;i++)
-	{n=0;
-		if(strcmp(input==student[i].major))
-		{
-			Total = (student[i].sub1w*student[i].sub1grd+student[i].sub2w*student[i].sub2grd)/(student[i].sub1w+student[i].sub2w);
-			printf("%s \t %s \t %d \t %s(%d) \t %f \t %s(%d) \t %f \t %f\n",student[i].major,student[i].name,student[i].ID,student[i].sub1,student[i].sub1W,student[i].sub1Grd,student[i].sub2,student[i].sub2W,student[i].sub2Grd,Total);
-		}
-		n++;
-	}
-	if(n==0)
-	printf("No Majors match your search, please try again!");
-	
-return 0;	
+#include <stdio.h>
+#include <string.h>
+
+struct student {
+    char name[20];
+    char major[30];
+    long ID;
+    char sub1[20];
+    int sub1grd;
+    char sub2[20];
+    int sub2grd;
+} student[3] = {
+    {"Roderick", "ME", 1820252057, "Calculus", 95, "Linear Algebra", 85},
+    {"LI", "CS", 876438676, "Calculus", 94, "Linear Algebra", 84},
+    {"Lance", "ME", 1820252058, "Calculus", 90, "Linear Algebra", 78},
+};
+
+int main() {
+    int i, n, Total, stdtotal = sizeof(student) / sizeof(student[0]);
+    char input[30];
+
+    char majorlist[10][30];
+    int majorCount = 0;
+
+    printf("Current existing Majors:\n");
+
+    for (i = 0; i < stdtotal; i++) {
+        int exists = 0;
+        for (int j = 0; j < majorCount; j++) {
+            if (strcmp(majorlist[j], student[i].major) == 0) {
+                exists = 1;
+                break;
+            }
+        }
+        if (!exists) {
+            strcpy(majorlist[majorCount], student[i].major);
+            majorCount++;
+        }
+    }
+
+    // Print unique majors
+    for (i = 0; i < majorCount; i++) {
+        printf("%s\n", majorlist[i]);
+    }
+
+    printf("\nPlease Select a Major: ");
+   	scanf("%s",input);
+
+    n = 0;
+    for (i = 0; i < stdtotal; i++) {
+        if (strcmp(input, student[i].major) == 0) {
+            Total = (student[i].sub1grd + student[i].sub2grd) / 2;
+
+            if (n == 0)
+                printf("Major\t      Name\t\tStudent ID\t  Subject 1    Grade\t Subject 2\t Grade\t  Total\n");
+
+            printf("%5s\t%10s\t\t%10ld %15s\t%3.2d\t%15s\t  %3.2d\t%5d\n",
+                student[i].major, student[i].name, student[i].ID,
+                student[i].sub1, student[i].sub1grd,
+                student[i].sub2, student[i].sub2grd, Total);
+
+            n++;
+        }
+    }
+
+    if (n == 0)
+        printf("No Majors match your search, please try again!\n");
+
+    return 0;
 }
