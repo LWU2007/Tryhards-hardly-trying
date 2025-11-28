@@ -3,10 +3,10 @@
 #include<stdio.h>
 
 
-typedef struct {//only one tyoe oif 
+struct student {//only one tyoe oif 
     char name[50];
     int ID;
-    int major; 
+    char major[50]; 
 
     char sub1[50];
     float sub1grd;
@@ -14,8 +14,9 @@ typedef struct {//only one tyoe oif
     char sub2[50];
     float sub2grd;
 
-} input;
+} student[1] = {{"Roderick",1820252057,"Engineering","Calculus",95.0,"Linear Algebra",85.0}}; 
 
+int func3();
 int main() {
     int oper;
 
@@ -40,7 +41,7 @@ int main() {
             printf("This is a test2");
             break;
         case 3:
-            printf("This is a test 3");
+            func3();
             break;
         case 4:
             printf("This is a test4");
@@ -53,6 +54,60 @@ int main() {
             break;
 
     }
+
+    return 0;
+}
+
+int func3() {
+    int i, n, Total, stdtotal = sizeof(student) / sizeof(student[0]);
+    char input[30];
+
+    char majorlist[10][30];
+    int majorCount = 0;
+
+    printf("Current existing Majors:\n");
+
+    for (i = 0; i < stdtotal; i++) {
+        int exists = 0;
+        for (int j = 0; j < majorCount; j++) {
+            if (strcmp(majorlist[j], student[i].major) == 0) {
+                exists = 1;
+                break;
+            }
+        }
+        if (!exists) {
+            strcpy(majorlist[majorCount], student[i].major);
+            majorCount++;
+        }
+    }
+
+    // Print unique majors
+    for (i = 0; i < majorCount; i++) {
+        printf("%s\n", majorlist[i]);
+    }
+
+    printf("\nPlease Select a Major: ");
+   	scanf("%s",input);
+
+    n = 0;
+    for (i = 0; i < stdtotal; i++) {
+        if (strcmp(input, student[i].major) == 0) {
+            Total = (student[i].sub1grd + student[i].sub2grd) / 2;
+
+            if (n == 0)
+                printf("Major\t\tName\t\tStudent ID\t  Subject 1    Grade\t Subject 2\t Grade\t  Total\n");
+
+            printf("%5s\t%10s\t\t%10d %15s\t%3.2f\t%15s\t  %3.2f\t%5d\n",
+                student[i].major, student[i].name, student[i].ID,
+                student[i].sub1, student[i].sub1grd,
+                student[i].sub2, student[i].sub2grd, Total);
+
+            n++;
+        }
+    }
+
+    if (n == 0)
+        printf("No Majors match your search, please try again!\n");
 
     return 0;
 }
