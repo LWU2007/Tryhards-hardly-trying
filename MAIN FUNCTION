@@ -16,6 +16,10 @@ struct student {
 
 int studentCount = 0;
 
+struct Student {
+    char name[50];
+    float grade;
+};
 
 void remove_newline(char *str) {
     str[strcspn(str, "\n")] = '\0';
@@ -24,7 +28,9 @@ void remove_newline(char *str) {
 void print_info(struct student s);
 int func1();
 int func3();
-
+void browseResults();
+void sortByGrade(struct Student s[], int n, int ascending);
+void printList(struct Student s[], int n);
 
 int main(){
     int option;
@@ -48,15 +54,13 @@ int main(){
             case 2: printf("This is test 2\n"); break;
             case 3: func3(); break;
             case 4: printf("This is test 4\n"); break;
-            case 5: printf("This is test 5\n"); break;
+            case 5: browseResults(); break;
             case 0: printf("Exiting program...\n"); return 0;
             default: printf("Invalid input! Try again.\n");
         }
     }
     return 0;
 }
-
-
 
 int func1() {
 
@@ -122,8 +126,6 @@ int func1() {
 
     return 0;
 }
-
-
 
 int func3() {
     if (studentCount == 0) {
@@ -196,8 +198,6 @@ int func3() {
     return 0;
 }
 
-
-
 void print_info(struct student s) {
     printf("\n+---------------------------------+---------------------------------+\n");
     printf("| Name: %-25.25s | Major: %-24.24s |\n", s.name, s.major);
@@ -205,4 +205,99 @@ void print_info(struct student s) {
     printf("| %-31.31s | %-31.31s |\n", s.sub1, s.sub2);
     printf("| Score: %-24.2f | Score: %-24.2f |\n", s.sub1grd, s.sub2grd);
     printf("+---------------------------------+---------------------------------+\n");
+}
+
+void sortByGrade(struct Student s[], int n, int ascending) {
+    int i, j;
+    struct Student temp;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            int condition = ascending ? (s[j].grade > s[j + 1].grade)
+                                      : (s[j].grade < s[j + 1].grade);
+
+            if (condition) {
+                temp = s[j];
+                s[j] = s[j + 1];
+                s[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void printList(struct Student s[], int n) {
+    printf("\n%-20s %-15s %s\n", "Name", "Major", "Average Grade");
+    printf("-------------------------------------------------\n");
+    for (int i = 0; i < n; i++) {
+        // Find the corresponding student in the main array to get their major
+        for (int j = 0; j < studentCount; j++) {
+            if (strcmp(s[i].name, student[j].name) == 0) {
+                printf("%-20s %-15s %.2f\n", s[i].name, student[j].major, s[i].grade);
+                break;
+            }
+        }
+    }
+}
+
+void browseResults() {
+    if (studentCount == 0) {
+        printf("\nNo students entered yet! Please use option 1 to input student data first.\n");
+        printf("Press ENTER to return to main menu...");
+        getchar();
+        return;
+    }
+
+    // Create an array of Student structures from the actual input data
+    struct Student students[100];
+    int n = studentCount;
+
+    for (int i = 0; i < n; i++) {
+        strcpy(students[i].name, student[i].name);
+        // Calculate average grade
+        students[i].grade = (student[i].sub1grd + student[i].sub2grd) / 2.0;
+    }
+
+    char cmd1[10], cmd2[10];
+
+    printf("\n=== Browsing of Results ===\n");
+    printf("Total students: %d\n", n);
+    printf("Initial list (unsorted):\n");
+    printList(students, n);
+
+    printf("\nCommands available:\n");
+    printf("  sort asc   - sort by average grade (lowest → highest)\n");
+    printf("  sort desc  - sort by average grade (highest → lowest)\n");
+    printf("  exit       - return to main menu\n");
+
+    while (1) {
+        printf("\n> ");
+
+        int count = scanf("%s", cmd1);
+        if (count == EOF) break;
+
+        if (strcmp(cmd1, "sort") == 0) {
+            scanf("%s", cmd2);
+
+            if (strcmp(cmd2, "asc") == 0) {
+                sortByGrade(students, n, 1);
+                printf("\nSorted list (ascending by average grade):\n");
+                printList(students, n);
+            }
+            else if (strcmp(cmd2, "desc") == 0) {
+                sortByGrade(students, n, 0);
+                printf("\nSorted list (descending by average grade):\n");
+                printList(students, n);
+            }
+            else {
+                printf("Invalid sort order. Use 'asc' or 'desc'.\n");
+            }
+        }
+        else if (strcmp(cmd1, "exit") == 0) {
+            printf("Returning to main menu.\n");
+            return;
+        }
+        else {
+            printf("Unknown command. Try 'sort asc', 'sort desc', or 'exit'.\n");
+        }
+    }
 }
