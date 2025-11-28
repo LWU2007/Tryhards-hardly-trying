@@ -3,10 +3,10 @@
 #include<stdio.h>
 
 
-struct student {//only one tyoe oif 
+struct student {
     char name[50];
     int ID;
-    char major[50]; 
+    char major[50];
 
     char sub1[50];
     float sub1grd;
@@ -14,48 +14,131 @@ struct student {//only one tyoe oif
     char sub2[50];
     float sub2grd;
 
-} student[1] = {{"Roderick",1820252057,"Engineering","Calculus",95.0,"Linear Algebra",85.0}}; 
+} student[100] = {};
 
+int studentCount = 0;
+
+
+void remove_newline(char *str) {
+    str[strcspn(str, "\n")] = '\0';
+}
+
+void print_info(struct student s);
+int func1();
 int func3();
-int main() {
-    int oper;
+int main(){
+    int option;
+    while (1) { 
+        printf("\n\n\t\t********************************************************\n");
+        printf("\t\t*    Welcome to the Student Grade Management System    *\n");
+        printf("\t\t*    Please enter your options:                        *\n");
+        printf("\t\t*    1. Input Basic Study Student Information          *\n");
+        printf("\t\t*    2. Result Query                                   *\n");
+        printf("\t\t*    3. Result Statistics                              *\n");
+        printf("\t\t*    4. Failing Statistics                             *\n");
+        printf("\t\t*    5. Browsing of Results                            *\n");
+        printf("\t\t*    0. Exit                                           *\n");
+        printf("\t\t********************************************************\n");
+        printf("\t\tPlease input a number (0-5): ");
 
-    printf("\t\t\t\t********************************************************\n");
-    printf("\t\t\t\t*    Welcome to the Student Grade Management System    *\n");
-    printf("\t\t\t\t*    Please enter your options:                        *\n");
-    printf("\t\t\t\t*    1. Input Basic Study Student Information          *\n");
-    printf("\t\t\t\t*    2. Result Query                                   *\n");
-    printf("\t\t\t\t*    3. Result Statistics                              *\n");
-    printf("\t\t\t\t*    4. Failing Statistics                             *\n");
-    printf("\t\t\t\t*    5. Browsing of Results                            *\n");
-    printf("\t\t\t\t*    0. Exit                                           *\n");
-    printf("\t\t\t\t********************************************************\n");
-    printf("\t\t\t\tPlease input a number (1-5): \n\n");
+        scanf("%d", &option);
+        getchar();  // Remove leftover newline
 
-    scanf("%d",&oper);
-    switch(oper){
-        case 1:
-            printf("haro");
-            break;
-        case 2:
-            printf("This is a test2");
-            break;
-        case 3:
-            func3();
-            main();
-        case 4:
-            printf("This is a test4");
-            break;
-        case 5:
-            printf("This is a test5");
-            break;
-        case 6:
-            printf("This is a test66");
-            break;
+        switch (option) {
+            case 1:
+                func1();
+                break;
 
+            case 2:
+                printf("This is a test2\n");
+                break;
+
+            case 3:
+                printf("This is a test3\n");
+                break;
+
+            case 4:
+                printf("This is a test4\n");
+                break;
+
+            case 5:
+                printf("This is a test5\n");
+                break;
+
+            case 0:
+                printf("Exiting program...\n");
+                return 0;
+
+            default:
+                printf("Invalid input! Try again.\n");
+        }
     }
 
     return 0;
+}
+
+int func1() {
+
+    int count;
+
+    printf("Number of Students to Input: ");
+    scanf("%d", &count);
+    getchar();
+
+    for (int i = 0; i < count; i++) {
+
+        struct student *s = &student[studentCount];
+
+        printf("\n--- Student %d ---\n", studentCount + 1);
+
+        printf("Name: ");
+        fgets(s->name, sizeof(s->name), stdin);
+        remove_newline(s->name);
+
+        printf("ID: ");
+        scanf("%d", &s->ID);
+        getchar();
+
+        int choice = 0;
+        while (choice < 1 || choice > 3) {
+            printf("Select Major (1=Engineering, 2=Business, 3=Arts): ");
+            scanf("%d", &choice);
+            getchar();
+        }
+
+        if (choice == 1) {
+            strcpy(s->major, "Engineering");
+            strcpy(s->sub1, "Calculus");
+            strcpy(s->sub2, "Physics");
+        }
+        else if (choice == 2) {
+            strcpy(s->major, "Business");
+            strcpy(s->sub1, "Accounting");
+            strcpy(s->sub2, "Marketing");
+        }
+        else {
+            strcpy(s->major, "Arts");
+            strcpy(s->sub1, "Philosophy");
+            strcpy(s->sub2, "History");
+        }
+
+        printf("%s Score: ", s->sub1);
+        scanf("%f", &s->sub1grd);
+
+        printf("%s Score: ", s->sub2);
+        scanf("%f", &s->sub2grd);
+        getchar();
+
+        studentCount++;
+    }
+
+    printf("\n===== ALL STORED STUDENTS =====\n");
+    for (int i = 0; i < studentCount; i++) {
+        print_info(student[i]);
+    }
+
+    printf("\nPress ENTER to return to the main menu...");
+    getchar();
 }
 
 int func3() {
@@ -123,3 +206,11 @@ int func3() {
     return 0;
 }
 
+void print_info(struct student s) {
+    printf("\n+---------------------------------+---------------------------------+\n");
+    printf("| Name: %-25.25s | Major: %-24.24s |\n", s.name, s.major);
+    printf("+---------------------------------+---------------------------------+\n");
+    printf("| %-31.31s | %-31.31s |\n", s.sub1, s.sub2);
+    printf("| Score: %-24.2f | Score: %-24.2f |\n", s.sub1grd, s.sub2grd);
+    printf("+---------------------------------+---------------------------------+\n");
+}
