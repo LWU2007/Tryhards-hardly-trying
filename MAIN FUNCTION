@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string.h>
-#inlcude<ctype.h>
+#include<stdio.h>
+
 
 typedef struct {//only one tyoe oif 
     char name[50];
@@ -16,7 +17,7 @@ typedef struct {//only one tyoe oif
 } input;
 
 int main() {
-    int operator;
+    int oper;
 
     printf("\t\t\t\t********************************************************\n");
     printf("\t\t\t\t*    Welcome to the Student Grade Management System    *\n");
@@ -30,10 +31,10 @@ int main() {
     printf("\t\t\t\t********************************************************\n");
     printf("\t\t\t\tPlease input a number (1-5): \n\n");
 
-    scanf("%d",&operator);
-    switch(operator){
+    scanf("%d",&oper);
+    switch(oper){
         case 1:
-            input_info();//nathan's
+            printf("haro");
             break;
         case 2:
             printf("This is a test2");
