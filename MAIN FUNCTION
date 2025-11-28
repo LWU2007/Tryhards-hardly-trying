@@ -1,3 +1,7 @@
+#include<stdio.h>
+#include<string.h>
+#inlcude<ctype.h>
+
 typedef struct {//only one tyoe oif 
     char name[50];
     int ID;
