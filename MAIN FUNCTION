@@ -1,1 +1,40 @@
+int main() {
+    int operator;
 
+    printf("\t\t\t\t********************************************************\n");
+    printf("\t\t\t\t*    Welcome to the Student Grade Management System    *\n");
+    printf("\t\t\t\t*    Please enter your options:                        *\n");
+    printf("\t\t\t\t*    1. Input Basic Study Student Information          *\n");
+    printf("\t\t\t\t*    2. Result Query                                   *\n");
+    printf("\t\t\t\t*    3. Result Statistics                              *\n");
+    printf("\t\t\t\t*    4. Failing Statistics                             *\n");
+    printf("\t\t\t\t*    5. Browsing of Results                            *\n");
+    printf("\t\t\t\t*    0. Exit                                           *\n");
+    printf("\t\t\t\t********************************************************\n");
+    printf("\t\t\t\tPlease input a number (1-5): \n\n");
+
+    scanf("%d",&operator);
+    switch(operator){
+        case 1:
+            input_info();//nathan's
+            break;
+        case 2:
+            printf("This is a test2");
+            break;
+        case 3:
+            printf("This is a test 3");
+            break;
+        case 4:
+            printf("This is a test4");
+            break;
+        case 5:
+            printf("This is a test5");
+            break;
+        case 6:
+            printf("This is a test66");
+            break;
+
+    }
+
+    return 0;
+}
