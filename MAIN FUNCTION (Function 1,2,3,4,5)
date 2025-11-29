@@ -1,0 +1,418 @@
+#include<stdio.h>
+#include<string.h>
+#include<ctype.h>
+#include <stdbool.h>
+
+struct student {
+    char name[50];
+    int ID;
+    char major[50];
+
+    char sub1[50];
+    float sub1grd;
+
+    char sub2[50];
+    float sub2grd;
+
+} student[100];
+
+int studentCount = 0;
+
+struct Student {
+    char name[50];
+    float grade;
+};
+
+void remove_newline(char *str) {
+    str[strcspn(str, "\n")] = '\0';
+}
+
+void print_info(struct student s);
+int func1();
+int func3();
+void failingStatistics();
+void browseResults();
+void sortByGrade(struct Student s[], int n, int ascending);
+void printList(struct Student s[], int n);
+
+// --- Result Query Function ---
+void result_query() {
+    if (studentCount == 0) {
+        printf("\nNo students entered yet! Please use option 1 to input student data first.\n");
+        printf("Press ENTER to return to main menu...");
+        getchar();
+        return;
+    }
+
+    char name_search[50];
+    char id_search[20];
+    char subject_search[50];
+
+    printf("\n==================== RESULT QUERY ====================\n");
+
+    printf("Enter Student Name (or press ENTER to skip): ");
+    fgets(name_search, sizeof(name_search), stdin);
+    name_search[strcspn(name_search, "\n")] = 0;
+
+    printf("Enter Student ID (or press ENTER to skip): ");
+    fgets(id_search, sizeof(id_search), stdin);
+    id_search[strcspn(id_search, "\n")] = 0;
+
+    printf("Enter Subject Name (or press ENTER to skip): ");
+    fgets(subject_search, sizeof(subject_search), stdin);
+    subject_search[strcspn(subject_search, "\n")] = 0;
+
+    printf("\n------------------ Search Results ------------------\n");
+
+    int found = 0;
+    for (int i = 0; i < studentCount; i++) {
+        int match_name = (strlen(name_search) == 0 || strcasecmp(student[i].name, name_search) == 0);
+        int match_ID   = (strlen(id_search) == 0 || sprintf((char[20]){0}, "%d", student[i].ID), strcasecmp((char[20]){0}, id_search) == 0);
+        int match_sub  = (strlen(subject_search) == 0 ||
+                          strcasecmp(student[i].sub1, subject_search) == 0 ||
+                          strcasecmp(student[i].sub2, subject_search) == 0);
+
+        if ((match_name && match_ID && match_sub) ||
+            (match_name && match_sub && strlen(id_search) == 0) ||
+            (match_ID && match_sub && strlen(name_search) == 0)) {
+
+            printf("\nName: %s\n", student[i].name);
+            printf("ID: %d\n", student[i].ID);
+            printf("Major: %s\n", student[i].major);
+            printf("Grades:\n");
+
+            if (strlen(subject_search) == 0) {
+                printf("  %s: %.2f\n", student[i].sub1, student[i].sub1grd);
+                printf("  %s: %.2f\n", student[i].sub2, student[i].sub2grd);
+            } else {
+                if (strcasecmp(student[i].sub1, subject_search) == 0)
+                    printf("  %s: %.2f\n", student[i].sub1, student[i].sub1grd);
+                if (strcasecmp(student[i].sub2, subject_search) == 0)
+                    printf("  %s: %.2f\n", student[i].sub2, student[i].sub2grd);
+            }
+
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("\nNo matching student record found.\n");
+    }
+
+    printf("----------------------------------------------------\n");
+    printf("Press ENTER to return to the main menu...");
+    getchar(); // pause
+}
+
+// --- Main Program ---
+int main(){
+    int option;
+    while (1) {
+        printf("\n\n\t\t********************************************************\n");
+        printf("\t\t*    Welcome to the Student Grade Management System    *\n");
+        printf("\t\t*    1. Input Basic Study Student Information          *\n");
+        printf("\t\t*    2. Result Query                                   *\n");
+        printf("\t\t*    3. Result Statistics                              *\n");
+        printf("\t\t*    4. Failing Statistics                             *\n");
+        printf("\t\t*    5. Browsing of Results                            *\n");
+        printf("\t\t*    0. Exit                                           *\n");
+        printf("\t\t********************************************************\n");
+        printf("\t\tPlease input a number (0-5): ");
+
+        scanf("%d", &option);
+        getchar();
+
+        switch (option) {
+            case 1: func1(); break;
+            case 2: result_query(); break; // <-- Integrated Result Query
+            case 3: func3(); break;
+            case 4: failingStatistics(); break;
+            case 5: browseResults(); break;
+            case 0: printf("Exiting program...\n"); return 0;
+            default: printf("Invalid input! Try again.\n");
+        }
+    }
+    return 0;
+}
+
+// --- Existing Functions Below (unchanged) ---
+
+int func1() {
+    int count;
+    printf("Number of Students to Input: ");
+    scanf("%d", &count);
+    getchar();
+
+    for (int i = 0; i < count; i++) {
+        struct student *s = &student[studentCount];
+
+        printf("\n--- Student %d ---\n", studentCount + 1);
+
+        printf("Name: ");
+        fgets(s->name, sizeof(s->name), stdin);
+        remove_newline(s->name);
+
+        printf("ID: ");
+        scanf("%d", &s->ID);
+        getchar();
+
+        int choice = 0;
+        while (choice < 1 || choice > 3) {
+            printf("Select Major (1=Engineering, 2=Business, 3=Arts): ");
+            scanf("%d", &choice);
+            getchar();
+        }
+
+        if (choice == 1) {
+            strcpy(s->major, "Engineering");
+            strcpy(s->sub1, "Calculus");
+            strcpy(s->sub2, "Physics");
+        } else if (choice == 2) {
+            strcpy(s->major, "Business");
+            strcpy(s->sub1, "Accounting");
+            strcpy(s->sub2, "Marketing");
+        } else {
+            strcpy(s->major, "Arts");
+            strcpy(s->sub1, "Philosophy");
+            strcpy(s->sub2, "History");
+        }
+
+        printf("%s Score: ", s->sub1);
+        scanf("%f", &s->sub1grd);
+
+        printf("%s Score: ", s->sub2);
+        scanf("%f", &s->sub2grd);
+        getchar();
+
+        studentCount++;
+    }
+
+    printf("\n===== ALL STORED STUDENTS =====\n");
+    for (int i = 0; i < studentCount; i++) {
+        print_info(student[i]);
+    }
+
+    printf("\nPress ENTER to return to the main menu...");
+    getchar();
+
+    return 0;
+}
+
+int func3() {
+    if (studentCount == 0) {
+        printf("\nNo students entered yet!\n");
+        return 0;
+    }
+
+    int i, n;
+    float Total;
+    char input[30];
+
+    char majorlist[10][30];
+    int majorCount = 0;
+
+    printf("\n********* RESULT STATISTICS *********\n");
+
+    printf("Current existing Majors:\n");
+
+    for (i = 0; i < studentCount; i++) {
+        int exists = 0;
+
+        for (int j = 0; j < majorCount; j++) {
+            if (strcmp(majorlist[j], student[i].major) == 0) {
+                exists = 1;
+                break;
+            }
+        }
+
+        if (!exists) {
+            strcpy(majorlist[majorCount], student[i].major);
+            majorCount++;
+        }
+    }
+
+    for (i = 0; i < majorCount; i++) {
+        printf("%s\n", majorlist[i]);
+    }
+
+    printf("\nPlease Select a Major: ");
+    scanf("%s", input);
+
+    n = 0;
+    for (i = 0; i < studentCount; i++) {
+        if (strcmp(input, student[i].major) == 0) {
+
+            Total = (student[i].sub1grd + student[i].sub2grd) / 2;
+
+            if (n == 0)
+                printf("\nMajor\t\tName\t\tID\t\tSubject1\tGrade\tSubject2\tGrade\tTotal\n");
+
+            printf("%s\t%s\t%d\t%s\t%.2f\t%s\t\t%.2f\t%.2f\n",
+                   student[i].major,
+                   student[i].name,
+                   student[i].ID,
+                   student[i].sub1,
+                   student[i].sub1grd,
+                   student[i].sub2,
+                   student[i].sub2grd,
+                   Total);
+
+            n++;
+        }
+    }
+
+    if (n == 0)
+        printf("No Majors match your search.\n");
+
+    printf("\n*************************************\n");
+
+    return 0;
+}
+
+void print_info(struct student s) {
+    printf("\n+---------------------------------+---------------------------------+\n");
+    printf("| Name: %-25.25s | Major: %-24.24s |\n", s.name, s.major);
+    printf("+---------------------------------+---------------------------------+\n");
+    printf("| %-31.31s | %-31.31s |\n", s.sub1, s.sub2);
+    printf("| Score: %-24.2f | Score: %-24.2f |\n", s.sub1grd, s.sub2grd);
+    printf("+---------------------------------+---------------------------------+\n");
+}
+
+void sortByGrade(struct Student s[], int n, int ascending) {
+    int i, j;
+    struct Student temp;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            int condition = ascending ? (s[j].grade > s[j + 1].grade)
+                                      : (s[j].grade < s[j + 1].grade);
+
+            if (condition) {
+                temp = s[j];
+                s[j] = s[j + 1];
+                s[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void printList(struct Student s[], int n) {
+    printf("\n%-20s %-15s %s\n", "Name", "Major", "Average Grade");
+    printf("-------------------------------------------------\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < studentCount; j++) {
+            if (strcmp(s[i].name, student[j].name) == 0) {
+                printf("%-20s %-15s %.2f\n", s[i].name, student[j].major, s[i].grade);
+                break;
+            }
+        }
+    }
+}
+
+void browseResults() {
+    if (studentCount == 0) {
+        printf("\nNo students entered yet! Please use option 1 to input student data first.\n");
+        printf("Press ENTER to return to main menu...");
+        getchar();
+        return;
+    }
+
+    struct Student students[100];
+    int n = studentCount;
+
+    for (int i = 0; i < n; i++) {
+        strcpy(students[i].name, student[i].name);
+        students[i].grade = (student[i].sub1grd + student[i].sub2grd) / 2.0;
+    }
+
+    char cmd1[10], cmd2[10];
+
+    printf("\n=== Browsing of Results ===\n");
+    printf("Total students: %d\n", n);
+    printf("Initial list (unsorted):\n");
+    printList(students, n);
+
+    printf("\nCommands available:\n");
+    printf("  sort asc   - sort by average grade (lowest → highest)\n");
+    printf("  sort desc  - sort by average grade (highest → lowest)\n");
+    printf("  exit       - return to main menu\n");
+
+    while (1) {
+        printf("\n> ");
+        int count = scanf("%s", cmd1);
+        if (count == EOF) break;
+
+        if (strcmp(cmd1, "sort") == 0) {
+            scanf("%s", cmd2);
+            if (strcmp(cmd2, "asc") == 0) {
+                sortByGrade(students, n, 1);
+                printf("\nSorted list (ascending by average grade):\n");
+                printList(students, n);
+            }
+            else if (strcmp(cmd2, "desc") == 0) {
+                sortByGrade(students, n, 0);
+                printf("\nSorted list (descending by average grade):\n");
+                printList(students, n);
+            }
+            else {
+                printf("Invalid sort order. Use 'asc' or 'desc'.\n");
+            }
+        }
+        else if (strcmp(cmd1, "exit") == 0) {
+            printf("Returning to main menu.\n");
+            return;
+        }
+        else {
+            printf("Unknown command. Try 'sort asc', 'sort desc', or 'exit'.\n");
+        }
+    }
+}
+
+void failingStatistics() {
+    if (studentCount == 0) {
+        printf("\nNo students entered yet! Please use option 1 to input student data first.\n");
+        printf("Press ENTER to return to main menu...");
+        getchar();
+        return;
+    }
+
+    printf("\n==================== FAILING STATISTICS ====================\n");
+    
+    bool anyStudentFailed = false;
+    
+    for(int i = 0; i < studentCount; i++) {
+        int failCount = 0;
+        char failedSubjects[2][50] = {0};
+        float failedGrades[2] = {0};
+        
+        // Check subject 1
+        if(student[i].sub1grd < 60.0) {
+            strcpy(failedSubjects[failCount], student[i].sub1);
+            failedGrades[failCount] = student[i].sub1grd;
+            failCount++;
+        }
+        
+        // Check subject 2
+        if(student[i].sub2grd < 60.0) {
+            strcpy(failedSubjects[failCount], student[i].sub2);
+            failedGrades[failCount] = student[i].sub2grd;
+            failCount++;
+        }
+        
+        if(failCount > 0) {
+            anyStudentFailed = true;
+            printf("\n%s (ID: %d) failed %d subject(s):\n", student[i].name, student[i].ID, failCount);
+            for(int k = 0; k < failCount; k++) {
+                printf("  - %s: %.1f\n", failedSubjects[k], failedGrades[k]);
+            }
+        }
+    }
+    
+    if(!anyStudentFailed) {
+        printf("No students failed any subjects.\n");
+    }
+    
+    printf("============================================================\n");
+    printf("Press ENTER to return to the main menu...");
+    getchar();
+}
