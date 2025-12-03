@@ -1,215 +1,41 @@
-/* students.c - Student Grade Management with portable save/load
- *
- * Portable: works with gcc/clang and MSVC.
- *
- * Fixes:
- *  - Replaced non-portable _dupenv_s / sprintf_s / fopen_s / strcpy_s etc.
- *  - Provided cross-platform case-insensitive compare macro.
- *  - Robust file parsing using fgets + sscanf.
- *  - Defensive bounds checking.
- */
-
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
+#include<stdio.h>
+#include<string.h>
+#include<ctype.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
-#ifdef _WIN32
-  #include <direct.h>
-  #define PATH_SEP "\\"
-  #define STRICMP _stricmp
-#else
-  #include <unistd.h>
-  #define PATH_SEP "/"
-  #define STRICMP strcasecmp
-#endif
-
-#define MAX_STUDENTS 100
-#define MAX_NAME_LEN 50
-#define MAX_MAJOR_LEN 50
-#define MAX_SUB_LEN 50
-#define FILE_PATH_LEN 260
-#define LINE_BUF 256
-
-/* ---------- Data structures ---------- */
 struct student {
-    char name[MAX_NAME_LEN];
-    int  ID;
-    char major[MAX_MAJOR_LEN];
+    char name[50];
+    int ID;
+    char major[50];
 
-    char sub1[MAX_SUB_LEN];
+    char sub1[50];
     float sub1grd;
 
-    char sub2[MAX_SUB_LEN];
+    char sub2[50];
     float sub2grd;
-} student[MAX_STUDENTS];
+
+} student[100];
 
 int studentCount = 0;
 
 struct Student {
-    char name[MAX_NAME_LEN];
+    char name[50];
     float grade;
 };
 
-/* ---------- Globals ---------- */
-char FILE_PATH[FILE_PATH_LEN] = {0};
-
-/* ---------- Helpers ---------- */
 void remove_newline(char *str) {
-    if (!str) return;
-    str[strcspn(str, "\r\n")] = '\0';
+    str[strcspn(str, "\n")] = '\0';
 }
 
-int case_insensitive_cmp(const char *a, const char *b) {
-    if (!a || !b) return -1;
-    return STRICMP(a, b);
-}
-
-/* ---------- File functions (portable) ---------- */
-
-void setFilePath(void) {
-    /* Try to put file in user's Downloads folder if possible, otherwise current dir */
-    const char *userProfile = getenv("USERPROFILE"); /* windows */
-    const char *home = getenv("HOME");               /* unix */
-
-    if (userProfile) {
-        /* Windows: try %USERPROFILE%\Downloads\students.txt */
-        snprintf(FILE_PATH, FILE_PATH_LEN, "%s%sDownloads%sstudents.txt", userProfile, PATH_SEP, PATH_SEP);
-    } else if (home) {
-        /* Unix-like: try ~/Downloads/students.txt */
-        snprintf(FILE_PATH, FILE_PATH_LEN, "%s%sDownloads%sstudents.txt", home, PATH_SEP, PATH_SEP);
-    } else {
-        /* Fallback to local file */
-        strncpy(FILE_PATH, "students.txt", FILE_PATH_LEN - 1);
-    }
-}
-
-/* Save file format (human-readable):
-   first line: studentCount
-   then each student:
-     name
-     ID
-     major
-     sub1 grade
-     sub2 grade
-*/
-void saveToFile(void) {
-    FILE *f = fopen(FILE_PATH, "w");
-    if (!f) {
-        /* try fallback in current directory */
-        f = fopen("students.txt", "w");
-        if (!f) {
-            printf("Error: unable to open save file for writing (%s or students.txt)\n", FILE_PATH);
-            return;
-        } else {
-            printf("Warning: couldn't write to %s — saving to ./students.txt instead\n", FILE_PATH);
-        }
-    }
-
-    fprintf(f, "%d\n", studentCount);
-    for (int i = 0; i < studentCount; ++i) {
-        /* write each field on its own line where appropriate for simple parsing */
-        fprintf(f, "%s\n", student[i].name);
-        fprintf(f, "%d\n", student[i].ID);
-        fprintf(f, "%s\n", student[i].major);
-        fprintf(f, "%s %.2f\n", student[i].sub1, student[i].sub1grd);
-        fprintf(f, "%s %.2f\n", student[i].sub2, student[i].sub2grd);
-    }
-    fclose(f);
-}
-
-void loadFromFile(void) {
-    FILE *f = fopen(FILE_PATH, "r");
-    if (!f) {
-        /* fallback: try local students.txt */
-        f = fopen("students.txt", "r");
-        if (!f) {
-            /* No existing file, that's fine */
-            printf("(No saved data found; starting with an empty list)\n");
-            return;
-        } else {
-            printf("Loaded data from ./students.txt\n");
-        }
-    } else {
-        printf("Loaded data from %s\n", FILE_PATH);
-    }
-
-    char line[LINE_BUF];
-    if (!fgets(line, sizeof(line), f)) {
-        fclose(f);
-        return;
-    }
-    remove_newline(line);
-    int count = 0;
-    if (sscanf(line, "%d", &count) != 1) {
-        fclose(f);
-        printf("Warning: save file corrupt (bad header). Starting empty.\n");
-        studentCount = 0;
-        return;
-    }
-    if (count < 0 || count > MAX_STUDENTS) count = 0;
-    studentCount = count;
-
-    for (int i = 0; i < studentCount; ++i) {
-        /* name */
-        if (!fgets(line, sizeof(line), f)) { studentCount = i; break; }
-        remove_newline(line);
-        strncpy(student[i].name, line, MAX_NAME_LEN - 1); student[i].name[MAX_NAME_LEN-1] = '\0';
-
-        /* ID */
-        if (!fgets(line, sizeof(line), f)) { studentCount = i; break; }
-        remove_newline(line);
-        int id = 0;
-        sscanf(line, "%d", &id);
-        student[i].ID = id;
-
-        /* major */
-        if (!fgets(line, sizeof(line), f)) { studentCount = i; break; }
-        remove_newline(line);
-        strncpy(student[i].major, line, MAX_MAJOR_LEN - 1); student[i].major[MAX_MAJOR_LEN-1] = '\0';
-
-        /* sub1 grade */
-        if (!fgets(line, sizeof(line), f)) { studentCount = i; break; }
-        remove_newline(line);
-        float g1 = 0.0f;
-        char s1[MAX_SUB_LEN] = {0};
-        if (sscanf(line, "%49s %f", s1, &g1) >= 1) {
-            strncpy(student[i].sub1, s1, MAX_SUB_LEN - 1); student[i].sub1[MAX_SUB_LEN-1] = '\0';
-            student[i].sub1grd = g1;
-        } else {
-            student[i].sub1[0] = '\0';
-            student[i].sub1grd = 0.0f;
-        }
-
-        /* sub2 grade */
-        if (!fgets(line, sizeof(line), f)) { studentCount = i+1; break; }
-        remove_newline(line);
-        float g2 = 0.0f;
-        char s2[MAX_SUB_LEN] = {0};
-        if (sscanf(line, "%49s %f", s2, &g2) >= 1) {
-            strncpy(student[i].sub2, s2, MAX_SUB_LEN - 1); student[i].sub2[MAX_SUB_LEN-1] = '\0';
-            student[i].sub2grd = g2;
-        } else {
-            student[i].sub2[0] = '\0';
-            student[i].sub2grd = 0.0f;
-        }
-    }
-
-    fclose(f);
-}
-
-/* ---------- Forward declarations ---------- */
 void print_info(struct student s);
-int func1(void);
-int func3(void);
-void failingStatistics(void);
-void browseResults(void);
+int func1();
+int func3();
+void failingStatistics();
+void browseResults();
 void sortByGrade(struct Student s[], int n, int ascending);
 void printList(struct Student s[], int n);
-void result_query(void);
 
-/* ---------- Result query (unchanged logic, portable funcs) ---------- */
+// --- Result Query Function ---
 void result_query() {
     if (studentCount == 0) {
         printf("\nNo students entered yet! Please use option 1 to input student data first.\n");
@@ -218,40 +44,43 @@ void result_query() {
         return;
     }
 
-    char name_search[MAX_NAME_LEN] = {0};
-    char id_search[32] = {0};
-    char subject_search[MAX_SUB_LEN] = {0};
+    char name_search[50];
+    char id_search[20];
+    char subject_search[50];
 
     printf("\n==================== RESULT QUERY ====================\n");
 
     printf("Enter Student Name (or press ENTER to skip): ");
     fgets(name_search, sizeof(name_search), stdin);
-    remove_newline(name_search);
+    name_search[strcspn(name_search, "\n")] = 0;
 
     printf("Enter Student ID (or press ENTER to skip): ");
     fgets(id_search, sizeof(id_search), stdin);
-    remove_newline(id_search);
+    id_search[strcspn(id_search, "\n")] = 0;
 
     printf("Enter Subject Name (or press ENTER to skip): ");
     fgets(subject_search, sizeof(subject_search), stdin);
-    remove_newline(subject_search);
+    subject_search[strcspn(subject_search, "\n")] = 0;
 
     printf("\n------------------ Search Results ------------------\n");
 
     int found = 0;
     for (int i = 0; i < studentCount; i++) {
-        int match_name = (strlen(name_search) == 0 || case_insensitive_cmp(student[i].name, name_search) == 0);
+        int match_name = (strlen(name_search) == 0 || strcasecmp(student[i].name, name_search) == 0);
 
-        /* convert ID to text for comparison */
-        char id_buf[32];
-        snprintf(id_buf, sizeof(id_buf), "%d", student[i].ID);
-        int match_ID = (strlen(id_search) == 0 || case_insensitive_cmp(id_buf, id_search) == 0);
+        /* --- FIXED: create a real buffer for ID conversion and compare --- */
+        char id_buffer[20];
+        sprintf(id_buffer, "%d", student[i].ID);
+        int match_ID = (strlen(id_search) == 0 || strcasecmp(id_buffer, id_search) == 0);
 
-        int match_sub = (strlen(subject_search) == 0 ||
-                         case_insensitive_cmp(student[i].sub1, subject_search) == 0 ||
-                         case_insensitive_cmp(student[i].sub2, subject_search) == 0);
+        int match_sub  = (strlen(subject_search) == 0 ||
+                          strcasecmp(student[i].sub1, subject_search) == 0 ||
+                          strcasecmp(student[i].sub2, subject_search) == 0);
 
-        if (match_name && match_ID && match_sub) {
+        if ((match_name && match_ID && match_sub) ||
+            (match_name && match_sub && strlen(id_search) == 0) ||
+            (match_ID && match_sub && strlen(name_search) == 0)) {
+
             printf("\nName: %s\n", student[i].name);
             printf("ID: %d\n", student[i].ID);
             printf("Major: %s\n", student[i].major);
@@ -261,9 +90,9 @@ void result_query() {
                 printf("  %s: %.2f\n", student[i].sub1, student[i].sub1grd);
                 printf("  %s: %.2f\n", student[i].sub2, student[i].sub2grd);
             } else {
-                if (case_insensitive_cmp(student[i].sub1, subject_search) == 0)
+                if (strcasecmp(student[i].sub1, subject_search) == 0)
                     printf("  %s: %.2f\n", student[i].sub1, student[i].sub1grd);
-                if (case_insensitive_cmp(student[i].sub2, subject_search) == 0)
+                if (strcasecmp(student[i].sub2, subject_search) == 0)
                     printf("  %s: %.2f\n", student[i].sub2, student[i].sub2grd);
             }
 
@@ -277,14 +106,11 @@ void result_query() {
 
     printf("----------------------------------------------------\n");
     printf("Press ENTER to return to the main menu...");
-    getchar(); /* pause */
+    getchar(); // pause
 }
 
-/* ---------- Main program ---------- */
-int main(void) {
-    setFilePath();
-    loadFromFile();
-
+// --- Main Program ---
+int main(){
     int option;
     while (1) {
         printf("\n\n\t\t********************************************************\n");
@@ -298,111 +124,70 @@ int main(void) {
         printf("\t\t********************************************************\n");
         printf("\t\tPlease input a number (0-5): ");
 
-        if (scanf("%d", &option) != 1) {
-            /* clear invalid input */
-            int c;
-            while ((c = getchar()) != EOF && c != '\n');
-            printf("Invalid input! Try again.\n");
-            continue;
-        }
-        getchar(); /* consume newline */
+        scanf("%d", &option);
+        getchar();
 
         switch (option) {
-            case 1: func1(); saveToFile(); break;
-            case 2: result_query(); break;
+            case 1: func1(); break;
+            case 2: result_query(); break; // <-- Integrated Result Query
             case 3: func3(); break;
             case 4: failingStatistics(); break;
             case 5: browseResults(); break;
-            case 0:
-                printf("Saving data...\n");
-                saveToFile();
-                printf("Exiting program...\n");
-                return 0;
-            default:
-                printf("Invalid input! Try again.\n");
+            case 0: printf("Exiting program...\n"); return 0;
+            default: printf("Invalid input! Try again.\n");
         }
     }
-
     return 0;
 }
 
-/* ---------- Existing functions (ported/cleaned) ---------- */
+// --- Existing Functions Below (unchanged) ---
 
 int func1() {
     int count;
     printf("Number of Students to Input: ");
-    if (scanf("%d", &count) != 1) {
-        int c; while ((c = getchar()) != EOF && c != '\n');
-        printf("Invalid number. Returning.\n");
-        return 0;
-    }
+    scanf("%d", &count);
     getchar();
 
-    for (int k = 0; k < count; k++) {
-        if (studentCount >= MAX_STUDENTS) {
-            printf("Maximum students reached (%d). Cannot add more.\n", MAX_STUDENTS);
-            break;
-        }
-
+    for (int i = 0; i < count; i++) {
         struct student *s = &student[studentCount];
 
         printf("\n--- Student %d ---\n", studentCount + 1);
 
         printf("Name: ");
-        if (!fgets(s->name, sizeof(s->name), stdin)) s->name[0] = '\0';
+        fgets(s->name, sizeof(s->name), stdin);
         remove_newline(s->name);
 
         printf("ID: ");
-        if (scanf("%d", &s->ID) != 1) {
-            s->ID = 0;
-            int c; while ((c = getchar()) != EOF && c != '\n');
-        } else {
-            getchar();
-        }
+        scanf("%d", &s->ID);
+        getchar();
 
         int choice = 0;
         while (choice < 1 || choice > 3) {
             printf("Select Major (1=Engineering, 2=Business, 3=Arts): ");
-            if (scanf("%d", &choice) != 1) {
-                int c; while ((c = getchar()) != EOF && c != '\n');
-                choice = 0;
-            } else {
-                getchar();
-            }
+            scanf("%d", &choice);
+            getchar();
         }
 
         if (choice == 1) {
-            strncpy(s->major, "Engineering", MAX_MAJOR_LEN-1);
-            strncpy(s->sub1, "Calculus", MAX_SUB_LEN-1);
-            strncpy(s->sub2, "Physics", MAX_SUB_LEN-1);
+            strcpy(s->major, "Engineering");
+            strcpy(s->sub1, "Calculus");
+            strcpy(s->sub2, "Physics");
         } else if (choice == 2) {
-            strncpy(s->major, "Business", MAX_MAJOR_LEN-1);
-            strncpy(s->sub1, "Accounting", MAX_SUB_LEN-1);
-            strncpy(s->sub2, "Marketing", MAX_SUB_LEN-1);
+            strcpy(s->major, "Business");
+            strcpy(s->sub1, "Accounting");
+            strcpy(s->sub2, "Marketing");
         } else {
-            strncpy(s->major, "Arts", MAX_MAJOR_LEN-1);
-            strncpy(s->sub1, "Philosophy", MAX_SUB_LEN-1);
-            strncpy(s->sub2, "History", MAX_SUB_LEN-1);
+            strcpy(s->major, "Arts");
+            strcpy(s->sub1, "Philosophy");
+            strcpy(s->sub2, "History");
         }
-        s->major[MAX_MAJOR_LEN-1] = '\0';
-        s->sub1[MAX_SUB_LEN-1] = '\0';
-        s->sub2[MAX_SUB_LEN-1] = '\0';
 
         printf("%s Score: ", s->sub1);
-        if (scanf("%f", &s->sub1grd) != 1) {
-            s->sub1grd = 0.0f;
-            int c; while ((c = getchar()) != EOF && c != '\n');
-        } else {
-            getchar();
-        }
+        scanf("%f", &s->sub1grd);
 
         printf("%s Score: ", s->sub2);
-        if (scanf("%f", &s->sub2grd) != 1) {
-            s->sub2grd = 0.0f;
-            int c; while ((c = getchar()) != EOF && c != '\n');
-        } else {
-            getchar();
-        }
+        scanf("%f", &s->sub2grd);
+        getchar();
 
         studentCount++;
     }
@@ -459,7 +244,7 @@ int func3() {
                 printf("----------------------------------------------------------------------------------------------------------------\n");
             }
 
-            printf("%5s %10s\t\t%10d %15s\t%3.2f\t  %15s\t %3.2f\t  %3.2f\n",
+            printf("%5s %15s\t%10d %15s\t%3.2f\t  %15s\t %3.2f\t  %3.2f\n",
                 student[i].major, student[i].name, student[i].ID,
                 student[i].sub1, student[i].sub1grd,
                 student[i].sub2, student[i].sub2grd, Total);
@@ -478,6 +263,8 @@ int func3() {
 
     return 0;
 }
+
+
 void print_info(struct student s) {
     printf("\n+---------------------------------+---------------------------------+\n");
     printf("| Name: %-25.25s | Major: %-24.24s |\n", s.name, s.major);
@@ -488,13 +275,16 @@ void print_info(struct student s) {
 }
 
 void sortByGrade(struct Student s[], int n, int ascending) {
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
+    int i, j;
+    struct Student temp;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
             int condition = ascending ? (s[j].grade > s[j + 1].grade)
                                       : (s[j].grade < s[j + 1].grade);
 
             if (condition) {
-                struct Student temp = s[j];
+                temp = s[j];
                 s[j] = s[j + 1];
                 s[j + 1] = temp;
             }
@@ -523,16 +313,15 @@ void browseResults() {
         return;
     }
 
-    struct Student students[MAX_STUDENTS];
+    struct Student students[100];
     int n = studentCount;
 
     for (int i = 0; i < n; i++) {
-        strncpy(students[i].name, student[i].name, MAX_NAME_LEN-1);
-        students[i].name[MAX_NAME_LEN-1] = '\0';
-        students[i].grade = (student[i].sub1grd + student[i].sub2grd) / 2.0f;
+        strcpy(students[i].name, student[i].name);
+        students[i].grade = (student[i].sub1grd + student[i].sub2grd) / 2.0;
     }
 
-    char cmd1[16], cmd2[16];
+    char cmd1[10], cmd2[10];
 
     printf("\n=== Browsing of Results ===\n");
     printf("Total students: %d\n", n);
@@ -540,31 +329,28 @@ void browseResults() {
     printList(students, n);
 
     printf("\nCommands available:\n");
-    printf("  sort asc   - sort by average grade (lowest -> highest)\n");
-    printf("  sort desc  - sort by average grade (highest -> lowest)\n");
+    printf("  sort asc   - sort by average grade (lowest ? highest)\n");
+    printf("  sort desc  - sort by average grade (highest ? lowest)\n");
     printf("  exit       - return to main menu\n");
 
     while (1) {
         printf("\n> ");
-        if (fgets(cmd1, sizeof(cmd1), stdin) == NULL) break;
-        remove_newline(cmd1);
+        int count = scanf("%s", cmd1);
+        if (count == EOF) break;
 
-        if (strncmp(cmd1, "sort", 4) == 0) {
-            /* parse second token */
-            if (fgets(cmd2, sizeof(cmd2), stdin) == NULL) {
-                printf("Missing sort order. Use 'sort asc' or 'sort desc'.\n");
-                continue;
-            }
-            remove_newline(cmd2);
+        if (strcmp(cmd1, "sort") == 0) {
+            scanf("%s", cmd2);
             if (strcmp(cmd2, "asc") == 0) {
                 sortByGrade(students, n, 1);
                 printf("\nSorted list (ascending by average grade):\n");
                 printList(students, n);
-            } else if (strcmp(cmd2, "desc") == 0) {
+            }
+            else if (strcmp(cmd2, "desc") == 0) {
                 sortByGrade(students, n, 0);
                 printf("\nSorted list (descending by average grade):\n");
                 printList(students, n);
-            } else {
+            }
+            else {
                 printf("Invalid sort order. Use 'asc' or 'desc'.\n");
             }
         }
@@ -587,40 +373,43 @@ void failingStatistics() {
     }
 
     printf("\n==================== FAILING STATISTICS ====================\n");
-
+    
     bool anyStudentFailed = false;
-
-    for (int i = 0; i < studentCount; i++) {
+    
+    for(int i = 0; i < studentCount; i++) {
         int failCount = 0;
-        char failedSubjects[2][MAX_SUB_LEN];
+        char failedSubjects[2][50] = {0};
         float failedGrades[2] = {0};
-
-        if (student[i].sub1grd < 60.0f) {
-            strncpy(failedSubjects[failCount], student[i].sub1, MAX_SUB_LEN-1);
-            failedSubjects[failCount][MAX_SUB_LEN-1] = '\0';
+        
+        // Check subject 1
+        if(student[i].sub1grd < 60.0) {
+            strcpy(failedSubjects[failCount], student[i].sub1);
             failedGrades[failCount] = student[i].sub1grd;
             failCount++;
         }
-        if (student[i].sub2grd < 60.0f) {
-            strncpy(failedSubjects[failCount], student[i].sub2, MAX_SUB_LEN-1);
-            failedSubjects[failCount][MAX_SUB_LEN-1] = '\0';
+        
+        // Check subject 2
+        if(student[i].sub2grd < 60.0) {
+            strcpy(failedSubjects[failCount], student[i].sub2);
             failedGrades[failCount] = student[i].sub2grd;
             failCount++;
         }
-        if (failCount > 0) {
+        
+        if(failCount > 0) {
             anyStudentFailed = true;
             printf("\n%s (ID: %d) failed %d subject(s):\n", student[i].name, student[i].ID, failCount);
-            for (int k = 0; k < failCount; k++) {
+            for(int k = 0; k < failCount; k++) {
                 printf("  - %s: %.1f\n", failedSubjects[k], failedGrades[k]);
             }
         }
     }
-
-    if (!anyStudentFailed) {
+    
+    if(!anyStudentFailed) {
         printf("No students failed any subjects.\n");
     }
-
+    
     printf("============================================================\n");
     printf("Press ENTER to return to the main menu...");
     getchar();
 }
+
