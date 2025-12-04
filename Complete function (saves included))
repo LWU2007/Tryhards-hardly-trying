@@ -244,7 +244,7 @@ int func3() {
                 printf("----------------------------------------------------------------------------------------------------------------\n");
             }
 
-            printf("%5s %15s\t%10d %15s\t%3.2f\t  %15s\t %3.2f\t  %3.2f\n",
+            printf("%12s %15s\t%10d %15s\t%3.2f\t  %15s\t %3.2f\t  %3.2f\n",
                 student[i].major, student[i].name, student[i].ID,
                 student[i].sub1, student[i].sub1grd,
                 student[i].sub2, student[i].sub2grd, Total);
